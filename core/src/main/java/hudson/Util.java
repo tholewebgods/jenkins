@@ -135,7 +135,13 @@ public class Util {
     /**
      * Pattern for capturing variables. Either $xyz, ${xyz} or ${a.b} but not $a.b, while ignoring "$$"
       */
-    private static final Pattern VARIABLE = Pattern.compile("\\$([A-Za-z0-9_]+|\\{[A-Za-z0-9_.]+\\}|\\$)");
+    private static final Pattern VARIABLE = Pattern.compile("\\$([A-Za-z0-9_]+|\\{[A-Za-z0-9_.]+(:-[^}]*)?\\}|\\$)");
+
+    /**
+     * Pattern for capturing variable names and their default values (if).
+     * Confirms to the sh/bash syntax ${variable:-defaultvalue}
+     */
+    private static final Pattern VARIABLE_DEFAULT = Pattern.compile("^([A-Za-z0-9_.]+):-([^}]*)$");
 
     /**
      * Replaces the occurrence of '$key' by <tt>properties.get('key')</tt>.
@@ -174,7 +180,22 @@ public class Util {
                value = "$";
             } else {
                if(key.charAt(0)=='{')  key = key.substring(1,key.length()-1);
+
+               Matcher defaultMatcher = VARIABLE_DEFAULT.matcher(key);
+               String defaultValue = null;
+
+               if (defaultMatcher.matches()) {
+                  key = defaultMatcher.group(1);
+                  // Set to default value beforehand
+                  defaultValue = defaultMatcher.group(2);
+               }
+
                value = resolver.resolve(key);
+
+               if (value == null) {
+                  // If it has been set extracted use it as default
+                  value = defaultValue;
+               }
             }
 
             if(value==null)

@@ -107,6 +107,16 @@ public class UtilTest {
         assertEquals("a-aa", Util.replaceMacro("$A-$AA",m));
         assertEquals("/a/foo/can/B/you-believe_aa~it?", Util.replaceMacro("/$A/foo/can/$B/you-believe_$AA~it?",m));
         assertEquals("$$aa$Ba${A}$it", Util.replaceMacro("$$$DOLLAR${AA}$$B${ENCLOSED}$it",m));
+
+        // test expressions with default values
+        assertEquals("aa", Util.replaceMacro("${AA:-}", m));
+        assertEquals("aa", Util.replaceMacro("${AA:-foo}", m));
+        assertEquals("aa", Util.replaceMacro("${AA:-foo bar}", m));
+        assertEquals("aa}", Util.replaceMacro("${AA:-foo}}", m));
+        assertEquals("", Util.replaceMacro("${XX:-}", m));
+        assertEquals("foo", Util.replaceMacro("${XX:-foo}", m));
+        assertEquals("foo bar", Util.replaceMacro("${XX:-foo bar}", m));
+        assertEquals("foo}", Util.replaceMacro("${XX:-foo}}", m));
     }
 
     @Test
